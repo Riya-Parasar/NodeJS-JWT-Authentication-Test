@@ -25,32 +25,43 @@
                 <input type="password" name="password" id="password">
             </div>
 
-            <div>
+            <div id>
                 <button onclick="login()">Login</button>
-                <button onclick="getDashboard()">Get Dashboard</button>
             </div>
+     
+            <h1>Dashboard</h1>
+            <button onclick="getDashboard()">Get Dashboard</button>
+        
+            <h1>Settings</h1>
+            <button onclick="getSettings()">Get Settings</button>
+
         </main>
 
     </div>
 
     <script>
 
-        function login() {
+function login() {
             const data = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
             };
             axios.post('/api/login', data)
-
             .then(res => {
                 console.log(res);
                 document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
-            if (res && res.data && res.data.success) {
-               const token = res.data.token;
-               localStorage.setItem('jwt', token);
-                getDashboard();
-          }
+                if (res && res.data && res.data.success) {
+                    const token = res.data.token;
+                    localStorage.setItem('jwt', token);
+                    getDashboard();
+                }
+            })
+            .catch(error => {
+                if (error.response && error.response.status === 401) {
+                    // JWT token expired, reload the page to the root address
+                    window.location.href = '/';
+                }
             });
         }
 
@@ -68,6 +79,29 @@
         } 
       });
     }
+
+    function getSettings() {
+    const token = localStorage.getItem('jwt');
+    axios.get('/api/settings', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    }).then(res => {
+        if (res && res.data && res.data.success) {
+            document.querySelector('h1.row').innerHTML = 'Settings';
+            document.querySelector('main').innerHTML = res.data.mySettings;
+        } else {
+            // Handle errors when the request is successful but the response indicates an error
+            console.error('Error:', res.data.err);
+            // You can display an error message to the user or take other actions
+        }
+    }).catch(error => {
+        // Handle network errors or errors that occur during the request
+        console.error('Network Error:', error);
+        // You can display a network error message to the user or take other actions
+    });
+}
+
 
    /* function onLoad() {
             const token = localStorage.getItem('jwt');

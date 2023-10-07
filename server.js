@@ -41,7 +41,7 @@ app.post('/api/login', (req, res) => {
     const {username, password} = req.body;
     for(let user of users){
         if(username == user.username && password == user.password){
-            let token = jwt.sign({id: user.id, username: user.username }, secretKey, { expiresIn: '7d' });
+            let token = jwt.sign({id: user.id, username: user.username }, secretKey, { expiresIn: '3m' });
             res.json({
                 success: true,
                 err: null,
@@ -70,6 +70,13 @@ app.get('/api/dashboard', jwtMW, (req, res) =>{
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/api/settings', jwtMW, (req, res) => {
+    res.json({
+        success: true,
+        mySettings: 'Protected settings content!'
+    });
 });
 
 
